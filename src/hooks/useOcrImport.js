@@ -7,7 +7,6 @@ export function useOcrImport() {
   const { state, dispatch } = useContract();
   const [status, setStatusState] = useState(null); // { text, error } | null
   const [result, setResult] = useState(null); // { summary, filename, extractedText } | null
-  const [snapshot, setSnapshot] = useState(null);
 
   const processFile = useCallback(
     async (file) => {
@@ -29,13 +28,12 @@ export function useOcrImport() {
           return;
         }
 
-        const snap = {};
+        const snapshot = {};
         Object.keys(results).forEach((id) => {
-          snap[id] = state.contract[id];
+          snapshot[id] = state.contract[id];
         });
-        setSnapshot(snap);
 
-        dispatch({ type: "APPLY_EXTRACTED", results });
+        dispatch({ type: "APPLY_EXTRACTED", results, snapshot });
         dispatch({ type: "SET_ACTIVE_TAB", tab: "details" });
         setResult({ summary, filename: file.name, extractedText: text.slice(0, 20000) });
         setStatusState(null);
@@ -52,9 +50,8 @@ export function useOcrImport() {
   }
 
   function discardAll() {
-    if (snapshot) dispatch({ type: "DISCARD_EXTRACTED", snapshot });
+    dispatch({ type: "DISCARD_EXTRACTED" });
     setResult(null);
-    setSnapshot(null);
   }
 
   return { status, result, processFile, confirmAll, discardAll };

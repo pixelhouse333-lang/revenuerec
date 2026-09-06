@@ -57,7 +57,7 @@ html, body {
 }
 
 .app {
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 32px 32px 88px;
 }
@@ -350,8 +350,8 @@ input::placeholder, textarea::placeholder {
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 28px;
   align-items: start;
 }
 
@@ -511,6 +511,8 @@ input::placeholder, textarea::placeholder {
 
 .grid { display: grid; gap: 18px; }
 .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.contract-derived-row { margin-top: 18px; }
 
 @media (max-width: 520px) {
   .grid-2 { grid-template-columns: 1fr; }
@@ -995,13 +997,54 @@ input::placeholder, textarea::placeholder {
   border-radius: 6px;
 }
 
-.field.field-pending > span:first-child::after {
-  content: "· AI-extracted, verify";
-  margin-left: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: var(--warning);
+.field-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.checkbox-field .field-label-row {
+  flex: 1;
+}
+
+.field-review-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  animation: fade-slide-in 0.18s ease both;
+}
+
+.field-review-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.field-review-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.field-review-confirm:hover {
+  background: rgba(61, 220, 132, 0.14);
+  border-color: rgba(61, 220, 132, 0.4);
+  color: var(--good);
+}
+
+.field-review-reject:hover {
+  background: rgba(255, 92, 92, 0.14);
+  border-color: rgba(255, 92, 92, 0.4);
+  color: var(--critical);
 }
 
 /* WIP ledger */

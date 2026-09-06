@@ -28,6 +28,7 @@ const initialState = {
   wipEntries: [],
   activeTab: "details",
   pendingFieldIds: [],
+  pendingSnapshot: {},
   savedContracts: [],
   currentContractId: null,
 };
@@ -37,7 +38,9 @@ function reducer(state, action) {
     case "SET_FIELD": {
       const contract = { ...state.contract, [action.field]: action.value };
       const pendingFieldIds = state.pendingFieldIds.filter((id) => id !== action.field);
-      return { ...state, contract, pendingFieldIds };
+      const pendingSnapshot = { ...state.pendingSnapshot };
+      delete pendingSnapshot[action.field];
+      return { ...state, contract, pendingFieldIds, pendingSnapshot };
     }
     case "TOUCH_COST_ESTIMATE":
       return { ...state, contract: { ...state.contract, costEstimateUpdatedAt: action.date } };
@@ -52,13 +55,27 @@ function reducer(state, action) {
     case "APPLY_EXTRACTED": {
       const contract = { ...state.contract, ...action.results };
       const pendingFieldIds = Array.from(new Set([...state.pendingFieldIds, ...Object.keys(action.results)]));
-      return { ...state, contract, pendingFieldIds };
+      const pendingSnapshot = { ...state.pendingSnapshot, ...action.snapshot };
+      return { ...state, contract, pendingFieldIds, pendingSnapshot };
+    }
+    case "CONFIRM_FIELD": {
+      const pendingFieldIds = state.pendingFieldIds.filter((id) => id !== action.field);
+      const pendingSnapshot = { ...state.pendingSnapshot };
+      delete pendingSnapshot[action.field];
+      return { ...state, pendingFieldIds, pendingSnapshot };
+    }
+    case "REJECT_FIELD": {
+      const contract = { ...state.contract, [action.field]: state.pendingSnapshot[action.field] };
+      const pendingFieldIds = state.pendingFieldIds.filter((id) => id !== action.field);
+      const pendingSnapshot = { ...state.pendingSnapshot };
+      delete pendingSnapshot[action.field];
+      return { ...state, contract, pendingFieldIds, pendingSnapshot };
     }
     case "CONFIRM_ALL_PENDING":
-      return { ...state, pendingFieldIds: [] };
+      return { ...state, pendingFieldIds: [], pendingSnapshot: {} };
     case "DISCARD_EXTRACTED": {
-      const contract = { ...state.contract, ...action.snapshot };
-      return { ...state, contract, pendingFieldIds: [] };
+      const contract = { ...state.contract, ...state.pendingSnapshot };
+      return { ...state, contract, pendingFieldIds: [], pendingSnapshot: {} };
     }
     case "SET_SAVED_CONTRACTS":
       return { ...state, savedContracts: action.list };
@@ -69,6 +86,7 @@ function reducer(state, action) {
         wipEntries: action.record.wipEntries || [],
         currentContractId: action.record.id,
         pendingFieldIds: [],
+        pendingSnapshot: {},
       };
     case "NEW_CONTRACT":
       return {
@@ -77,6 +95,7 @@ function reducer(state, action) {
         wipEntries: [],
         currentContractId: null,
         pendingFieldIds: [],
+        pendingSnapshot: {},
       };
     case "SET_CURRENT_ID":
       return { ...state, currentContractId: action.id };

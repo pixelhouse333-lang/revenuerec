@@ -3,6 +3,7 @@ import { useContract } from "../context/ContractContext.jsx";
 import { TextField, NumberField, DateField, SelectField, TextAreaField, CheckboxField } from "./FormField.jsx";
 import { UploadIcon } from "./icons.jsx";
 import { contractPeriodText } from "../lib/calculations.js";
+import { fmtCurrency } from "../lib/format.js";
 import ImportModal from "./ImportModal.jsx";
 
 const CONTRACT_TYPE_OPTIONS = [
@@ -20,7 +21,7 @@ const PAYMENT_TERMS_OPTIONS = [
 ];
 
 export default function ContractDetailsTab() {
-  const { state } = useContract();
+  const { state, summary } = useContract();
   const [importOpen, setImportOpen] = useState(false);
   const periodText = useMemo(
     () => contractPeriodText(state.contract.startDate, state.contract.endDate),
@@ -47,7 +48,18 @@ export default function ContractDetailsTab() {
           <DateField id="startDate" label="Contract start date" />
           <DateField id="endDate" label="Contract end date" />
         </div>
-        <p className="field-note">Contract period: {periodText}</p>
+        <div className="grid grid-2 contract-derived-row">
+          <div className="pulled-stat">
+            <span className="pulled-stat-label">Total contract value</span>
+            <span className="pulled-stat-value">{fmtCurrency(summary.totalContractValue)}</span>
+            <span className="pulled-stat-source">Original price + approved change orders</span>
+          </div>
+          <div className="pulled-stat">
+            <span className="pulled-stat-label">Contract period</span>
+            <span className="pulled-stat-value">{periodText}</span>
+            <span className="pulled-stat-source">Inferred from start and end date</span>
+          </div>
+        </div>
       </section>
 
       <section className="card">
