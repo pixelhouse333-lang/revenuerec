@@ -46,6 +46,34 @@
   --font-mono: "Berkeley Mono", "SF Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
+:root[data-theme="light"] {
+  --bg:            #f7f7f8;
+  --surface:       #ffffff;
+  --surface-2:     #f2f2f4;
+  --surface-3:     #e8e8eb;
+  --border:        #e2e2e6;
+  --border-strong: #cfcfd6;
+  --text-primary:  #15151a;
+  --text-secondary:#55555f;
+  --text-muted:    #8b8b95;
+
+  --accent:        #2f6fe0;
+  --accent-strong: #1f57bd;
+  --accent-wash:   rgba(47, 111, 224, 0.10);
+  --accent-ring:   rgba(47, 111, 224, 0.22);
+
+  --good:          #1a9c4a;
+  --warning:       #b3790a;
+  --critical:      #d33a3a;
+
+  --shadow-card:
+    0 20px 40px -24px rgba(20, 20, 30, 0.12),
+    0 6px 16px -10px rgba(20, 20, 30, 0.08);
+  --shadow-card-hover:
+    0 24px 48px -20px rgba(20, 20, 30, 0.16),
+    0 8px 20px -8px rgba(20, 20, 30, 0.1);
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -204,6 +232,37 @@ html, body {
   border-top: 1px solid var(--border);
 }
 
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.theme-toggle svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
 .sidebar-version {
   font-size: 12.5px;
   font-weight: 600;
@@ -253,12 +312,6 @@ html, body {
   color: var(--text-secondary);
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
 
 @media (max-width: 860px) {
   .sidebar { display: none; }
@@ -367,6 +420,23 @@ input::placeholder, textarea::placeholder {
 .summary-column {
   position: sticky;
   top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.layout-single {
+  grid-template-columns: 1fr;
+}
+
+.contract-actions-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.contract-actions-buttons .btn {
+  flex: 1;
 }
 
 /* Cards */
@@ -1181,4 +1251,20 @@ td.wip-col-amount {
   padding: 28px 10px;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+/* Dashboard */
+
+.dashboard-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dashboard-row:hover {
+  background: var(--surface-2);
+}
+
+.dashboard-open-btn {
+  padding: 5px 10px;
+  font-size: 12px;
 }

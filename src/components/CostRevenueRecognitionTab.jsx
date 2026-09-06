@@ -5,11 +5,11 @@ import { fmtCurrency, fmtPercent } from "../lib/format.js";
 
 export default function CostRevenueRecognitionTab() {
   const { state, dispatch, summary } = useContract();
-  const lastKnownEstimate = useRef(state.contract.costToComplete);
+  const lastKnownEstimate = useRef(state.contract.totalEstimatedCost);
 
   const caption = state.contract.costEstimateUpdatedAt
-    ? `Management's estimate — may change as the project progresses. Last revised ${state.contract.costEstimateUpdatedAt}.`
-    : "Management's estimate — may change as the project progresses.";
+    ? `Management's estimate, set from the contract's cost codes at initiation. Last revised ${state.contract.costEstimateUpdatedAt}.`
+    : "Set automatically from the Cost Codes total. Stays fixed until management revises it here — it does not change just because WIP costs come in.";
 
   function handleEstimateBlur(e) {
     if (e.target.value !== lastKnownEstimate.current) {
@@ -19,6 +19,7 @@ export default function CostRevenueRecognitionTab() {
   }
 
   const wipEntryCount = state.wipEntries.length;
+  const overBudget = summary.costToComplete < 0;
 
   return (
     <div className="tab-panel" data-panel="revrec">
@@ -44,8 +45,8 @@ export default function CostRevenueRecognitionTab() {
           </div>
 
           <NumberField
-            id="costToComplete"
-            label="Estimated cost to complete ($)"
+            id="totalEstimatedCost"
+            label="Total estimated cost at completion ($)"
             min="0"
             step="0.01"
             placeholder="0.00"
@@ -54,9 +55,13 @@ export default function CostRevenueRecognitionTab() {
           />
 
           <div className="pulled-stat">
-            <span className="pulled-stat-label">Total estimated cost at completion</span>
-            <span className="pulled-stat-value">{fmtCurrency(summary.totalEstCost)}</span>
-            <span className="pulled-stat-source">{fmtPercent(summary.percentComplete)} complete</span>
+            <span className="pulled-stat-label">Estimated cost to complete (remaining)</span>
+            <span className={"pulled-stat-value" + (overBudget ? " variance-over" : "")}>
+              {fmtCurrency(summary.costToComplete)}
+            </span>
+            <span className="pulled-stat-source">
+              {fmtPercent(summary.percentComplete)} complete{overBudget ? " · over budget" : ""}
+            </span>
           </div>
         </div>
       </section>

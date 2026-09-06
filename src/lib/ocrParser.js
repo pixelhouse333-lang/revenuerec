@@ -97,6 +97,20 @@ export function parseContractText(text) {
     if (m) push("contractPrice", "Contract price", parseFloat(m[1].replace(/,/g, "")), m[0]);
   }
 
+  // --- Total estimated cost (the cost-code budget total, distinct from
+  // the contract price - the price includes fee/contingency on top) -----
+  m = findValueNearKeywords(
+    text,
+    [
+      /total\s+estimated\s+(?:direct\s*(?:&|and)\s*indirect\s+)?costs?/gi,
+      /total\s+estimated\s+budgeted\s+cost/gi,
+      /estimated\s+cost\s+of/gi,
+    ],
+    MONEY_VALUE_RE(),
+    { after: 100 }
+  );
+  if (m) push("totalEstimatedCost", "Total estimated cost", parseFloat(m[1].replace(/,/g, "")), m[0]);
+
   // --- Change orders --------------------------------------------------
   m = findValueNearKeywords(
     text,
@@ -203,7 +217,12 @@ export function parseContractText(text) {
   if (m) push("contractNumber", "Contract number", m[1].trim(), m[0]);
 
   // --- Project name --------------------------------------------------
-  m = findValueNearKeywords(text, [/project\s+name\s*:?/gi, /project\s*:/gi, /\bre\s*:/gi], /([^\n\r]{3,90})/, { after: 100 });
+  m = findValueNearKeywords(
+    text,
+    [/project\s+title\s*:?/gi, /project\s+name\s*:?/gi, /project\s*:/gi, /\bre\s*:/gi],
+    /([^\n\r]{3,90})/,
+    { after: 100 }
+  );
   if (m) push("projectName", "Project name", m[1].trim(), m[0]);
 
   // --- Customer / owner ------------------------------------------------
@@ -217,7 +236,14 @@ export function parseContractText(text) {
     push("customerName", "Customer / owner", name, m[0]);
   }
   if (!("customerName" in results)) {
-    m = findValueNearKeywords(text, [/owner\s+name\s*:?/gi, /owner\s*:/gi], /([^\n\r]{3,90})/, { after: 100 });
+    // Label lines vary a lot in real contracts: "Owner:", "Owner Name:",
+    // "OWNER / CLIENT:" - the name is usually on the line right after.
+    m = findValueNearKeywords(
+      text,
+      [/owner\s+name\s*:?/gi, /owner\s*(?:\/\s*client)?\s*:/gi],
+      /([^\n\r]{3,90})/,
+      { after: 100 }
+    );
     if (m) push("customerName", "Customer / owner", m[1].trim(), m[0]);
   }
 
@@ -225,7 +251,8 @@ export function parseContractText(text) {
   if (/cost[-\s]plus/i.test(text)) push("contractType", "Contract type", "cost-plus", "cost-plus");
   else if (/time\s+(?:and|&)\s+material/i.test(text)) push("contractType", "Contract type", "t-and-m", "time & material");
   else if (/unit\s+price/i.test(text)) push("contractType", "Contract type", "unit-price", "unit price");
-  else if (/lump[\s-]sum|fixed[\s-]price/i.test(text)) push("contractType", "Contract type", "fixed", "lump-sum / fixed price");
+  else if (/lump[\s-]sum|fixed[\s-]price|stipulated\s+(?:contract\s+)?(?:sum|price)/i.test(text))
+    push("contractType", "Contract type", "fixed", "lump-sum / fixed / stipulated price");
 
   return { results, summary };
 }

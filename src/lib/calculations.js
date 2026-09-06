@@ -15,8 +15,16 @@ export function contractPeriodText(startDate, endDate) {
 }
 
 /**
- * Central revenue-recognition math. Costs incurred to date always comes from
- * the WIP ledger (single source of truth) — never from a hand-typed field.
+ * Central revenue-recognition math.
+ *
+ * Costs incurred to date always comes from the WIP ledger (single source
+ * of truth) — never from a hand-typed field. Total Estimated Cost at
+ * Completion is the other, independent half: a management judgment call
+ * that starts out equal to the contract's cost-code budget and stays
+ * fixed until management explicitly revises it — it is NOT recalculated
+ * just because more WIP costs come in. Estimated Cost to Complete
+ * (the remaining work) is therefore derived, not entered directly:
+ * Total Estimated Cost − Costs Incurred to Date.
  */
 export function computeSummary(contract, wipEntries) {
   const contractPrice = num(contract.contractPrice);
@@ -24,8 +32,8 @@ export function computeSummary(contract, wipEntries) {
   const totalContractValue = contractPrice + changeOrders;
 
   const costsIncurred = wipTotal(wipEntries);
-  const costToComplete = num(contract.costToComplete);
-  const totalEstCost = costsIncurred + costToComplete;
+  const totalEstCost = num(contract.totalEstimatedCost);
+  const costToComplete = totalEstCost - costsIncurred;
 
   const percentComplete = totalEstCost > 0 ? costsIncurred / totalEstCost : 0;
   const estGrossProfit = totalContractValue - totalEstCost;

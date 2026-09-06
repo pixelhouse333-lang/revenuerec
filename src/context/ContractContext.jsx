@@ -16,7 +16,7 @@ export const emptyContract = {
   hasLiquidatedDamages: false,
   ldRate: "",
   notes: "",
-  costToComplete: "",
+  totalEstimatedCost: "",
   costEstimateUpdatedAt: null,
   amountBilled: "",
   cashCollected: "",
@@ -28,12 +28,24 @@ const initialState = {
   wipEntries: [],
   costCodes: [],
   pendingCostCodeIds: [],
+  activeView: "dashboard",
   activeTab: "details",
   pendingFieldIds: [],
   pendingSnapshot: {},
   savedContracts: [],
   currentContractId: null,
 };
+
+// Total Estimated Cost at Completion starts out equal to the cost-code
+// budget total and stays in sync with it - UNLESS management has
+// explicitly revised the estimate (tracked by costEstimateUpdatedAt),
+// at which point it's frozen and only changes on a further manual edit.
+function withSeededEstimate(state) {
+  if (state.contract.costEstimateUpdatedAt) return state;
+  const budgetTotal = state.costCodes.reduce((sum, c) => sum + c.budgetAmount, 0);
+  if (budgetTotal <= 0) return state;
+  return { ...state, contract: { ...state.contract, totalEstimatedCost: budgetTotal } };
+}
 
 function reducer(state, action) {
   switch (action.type) {
@@ -54,6 +66,8 @@ function reducer(state, action) {
       return { ...state, wipEntries: action.entries };
     case "SET_ACTIVE_TAB":
       return { ...state, activeTab: action.tab };
+    case "SET_ACTIVE_VIEW":
+      return { ...state, activeView: action.view };
     case "APPLY_EXTRACTED": {
       const contract = { ...state.contract, ...action.results };
       const pendingFieldIds = Array.from(new Set([...state.pendingFieldIds, ...Object.keys(action.results)]));
@@ -91,6 +105,8 @@ function reducer(state, action) {
         currentContractId: action.record.id,
         pendingFieldIds: [],
         pendingSnapshot: {},
+        activeView: "contracts",
+        activeTab: "details",
       };
     case "NEW_CONTRACT":
       return {
@@ -102,45 +118,47 @@ function reducer(state, action) {
         currentContractId: null,
         pendingFieldIds: [],
         pendingSnapshot: {},
+        activeView: "contracts",
+        activeTab: "details",
       };
     case "SET_CURRENT_ID":
       return { ...state, currentContractId: action.id };
 
     // --- Cost codes (budget breakdown) ---------------------------------
     case "ADD_COST_CODE":
-      return { ...state, costCodes: [...state.costCodes, action.costCode] };
+      return withSeededEstimate({ ...state, costCodes: [...state.costCodes, action.costCode] });
     case "REMOVE_COST_CODE":
-      return {
+      return withSeededEstimate({
         ...state,
         costCodes: state.costCodes.filter((c) => c.id !== action.id),
         pendingCostCodeIds: state.pendingCostCodeIds.filter((id) => id !== action.id),
-      };
+      });
     case "SET_COST_CODES":
-      return { ...state, costCodes: action.costCodes };
+      return withSeededEstimate({ ...state, costCodes: action.costCodes });
     case "IMPORT_COST_CODES": {
       const costCodes = [...state.costCodes, ...action.costCodes];
       const pendingCostCodeIds = [
         ...state.pendingCostCodeIds,
         ...action.costCodes.map((c) => c.id),
       ];
-      return { ...state, costCodes, pendingCostCodeIds };
+      return withSeededEstimate({ ...state, costCodes, pendingCostCodeIds });
     }
     case "CONFIRM_COST_CODE":
       return { ...state, pendingCostCodeIds: state.pendingCostCodeIds.filter((id) => id !== action.id) };
     case "REJECT_COST_CODE":
-      return {
+      return withSeededEstimate({
         ...state,
         costCodes: state.costCodes.filter((c) => c.id !== action.id),
         pendingCostCodeIds: state.pendingCostCodeIds.filter((id) => id !== action.id),
-      };
+      });
     case "CONFIRM_ALL_COST_CODES":
       return { ...state, pendingCostCodeIds: [] };
     case "DISCARD_PENDING_COST_CODES":
-      return {
+      return withSeededEstimate({
         ...state,
         costCodes: state.costCodes.filter((c) => !state.pendingCostCodeIds.includes(c.id)),
         pendingCostCodeIds: [],
-      };
+      });
     default:
       return state;
   }

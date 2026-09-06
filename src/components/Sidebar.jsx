@@ -1,4 +1,6 @@
 import React from "react";
+import { useContract } from "../context/ContractContext.jsx";
+import { useTheme } from "../hooks/useTheme.js";
 import {
   DashboardIcon,
   DocumentIcon,
@@ -6,9 +8,18 @@ import {
   LayersIcon,
   BarChartIcon,
   SettingsIcon,
+  SunIcon,
+  MoonIcon,
 } from "./icons.jsx";
 
 export default function Sidebar() {
+  const { state, dispatch } = useContract();
+  const { theme, toggleTheme } = useTheme();
+
+  function goTo(view) {
+    dispatch({ type: "SET_ACTIVE_VIEW", view });
+  }
+
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
@@ -22,16 +33,25 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         <span className="nav-section-label">Workspace</span>
 
-        <button type="button" className="nav-item" disabled>
+        <button
+          type="button"
+          className={"nav-item" + (state.activeView === "dashboard" ? " active" : "")}
+          aria-current={state.activeView === "dashboard" ? "page" : undefined}
+          onClick={() => goTo("dashboard")}
+        >
           <DashboardIcon className="nav-icon" />
           <span>Dashboard</span>
-          <span className="nav-badge">Soon</span>
         </button>
 
-        <div className="nav-item active" aria-current="page">
+        <button
+          type="button"
+          className={"nav-item" + (state.activeView === "contracts" ? " active" : "")}
+          aria-current={state.activeView === "contracts" ? "page" : undefined}
+          onClick={() => goTo("contracts")}
+        >
           <DocumentIcon className="nav-icon" />
           <span>Contracts</span>
-        </div>
+        </button>
 
         <button type="button" className="nav-item" disabled>
           <TrendingUpIcon className="nav-icon" />
@@ -61,6 +81,10 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
+        <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label="Toggle light/dark theme">
+          {theme === "dark" ? <MoonIcon /> : <SunIcon />}
+          <span>{theme === "dark" ? "Dark theme" : "Light theme"}</span>
+        </button>
         <span className="sidebar-version">Constructa</span>
         <span className="sidebar-phase mono-field">v0.1 · Phase 1</span>
       </div>
