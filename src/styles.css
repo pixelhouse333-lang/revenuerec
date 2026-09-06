@@ -1045,6 +1045,29 @@ input::placeholder, textarea::placeholder {
   color: var(--critical);
 }
 
+.row-review-actions {
+  margin-left: 8px;
+}
+
+/* Pending-review table row highlight (imported cost codes, etc.) */
+
+.row-pending td {
+  background: rgba(245, 166, 35, 0.06);
+  transition: background-color 0.2s ease;
+}
+
+.row-pending td:first-child {
+  box-shadow: inset 2px 0 0 var(--warning);
+}
+
+.variance-over {
+  color: var(--critical);
+}
+
+.wip-table-wrap-spaced {
+  margin-top: 18px;
+}
+
 /* WIP ledger */
 
 .wip-add-btn {

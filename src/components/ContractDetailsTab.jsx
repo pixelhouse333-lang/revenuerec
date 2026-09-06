@@ -5,6 +5,7 @@ import { UploadIcon } from "./icons.jsx";
 import { contractPeriodText } from "../lib/calculations.js";
 import { fmtCurrency } from "../lib/format.js";
 import ImportModal from "./ImportModal.jsx";
+import CostCodesSection from "./CostCodesSection.jsx";
 
 const CONTRACT_TYPE_OPTIONS = [
   { value: "fixed", label: "Fixed price" },
@@ -61,6 +62,8 @@ export default function ContractDetailsTab() {
           </div>
         </div>
       </section>
+
+      <CostCodesSection />
 
       <section className="card">
         <h2>Payment terms</h2>

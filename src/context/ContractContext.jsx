@@ -26,6 +26,8 @@ export const emptyContract = {
 const initialState = {
   contract: { ...emptyContract },
   wipEntries: [],
+  costCodes: [],
+  pendingCostCodeIds: [],
   activeTab: "details",
   pendingFieldIds: [],
   pendingSnapshot: {},
@@ -84,6 +86,8 @@ function reducer(state, action) {
         ...state,
         contract: { ...emptyContract, ...action.record },
         wipEntries: action.record.wipEntries || [],
+        costCodes: action.record.costCodes || [],
+        pendingCostCodeIds: [],
         currentContractId: action.record.id,
         pendingFieldIds: [],
         pendingSnapshot: {},
@@ -93,12 +97,50 @@ function reducer(state, action) {
         ...state,
         contract: { ...emptyContract },
         wipEntries: [],
+        costCodes: [],
+        pendingCostCodeIds: [],
         currentContractId: null,
         pendingFieldIds: [],
         pendingSnapshot: {},
       };
     case "SET_CURRENT_ID":
       return { ...state, currentContractId: action.id };
+
+    // --- Cost codes (budget breakdown) ---------------------------------
+    case "ADD_COST_CODE":
+      return { ...state, costCodes: [...state.costCodes, action.costCode] };
+    case "REMOVE_COST_CODE":
+      return {
+        ...state,
+        costCodes: state.costCodes.filter((c) => c.id !== action.id),
+        pendingCostCodeIds: state.pendingCostCodeIds.filter((id) => id !== action.id),
+      };
+    case "SET_COST_CODES":
+      return { ...state, costCodes: action.costCodes };
+    case "IMPORT_COST_CODES": {
+      const costCodes = [...state.costCodes, ...action.costCodes];
+      const pendingCostCodeIds = [
+        ...state.pendingCostCodeIds,
+        ...action.costCodes.map((c) => c.id),
+      ];
+      return { ...state, costCodes, pendingCostCodeIds };
+    }
+    case "CONFIRM_COST_CODE":
+      return { ...state, pendingCostCodeIds: state.pendingCostCodeIds.filter((id) => id !== action.id) };
+    case "REJECT_COST_CODE":
+      return {
+        ...state,
+        costCodes: state.costCodes.filter((c) => c.id !== action.id),
+        pendingCostCodeIds: state.pendingCostCodeIds.filter((id) => id !== action.id),
+      };
+    case "CONFIRM_ALL_COST_CODES":
+      return { ...state, pendingCostCodeIds: [] };
+    case "DISCARD_PENDING_COST_CODES":
+      return {
+        ...state,
+        costCodes: state.costCodes.filter((c) => !state.pendingCostCodeIds.includes(c.id)),
+        pendingCostCodeIds: [],
+      };
     default:
       return state;
   }

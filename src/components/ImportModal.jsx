@@ -97,11 +97,19 @@ export default function ImportModal({ onClose }) {
             <div className="scan-results">
               <div className="review-banner">
                 <div>
-                  <strong>
-                    {result.summary.length} {result.summary.length === 1 ? "field" : "fields"}
-                  </strong>{" "}
+                  {result.summary.length > 0 && (
+                    <strong>
+                      {result.summary.length} {result.summary.length === 1 ? "field" : "fields"}
+                    </strong>
+                  )}
+                  {result.summary.length > 0 && result.costCodeCount > 0 && " and "}
+                  {result.costCodeCount > 0 && (
+                    <strong>
+                      {result.costCodeCount} cost {result.costCodeCount === 1 ? "code" : "codes"}
+                    </strong>
+                  )}{" "}
                   imported from <span className="mono-field">{result.filename}</span> — review the highlighted
-                  fields on the form, then confirm.
+                  fields{result.costCodeCount > 0 ? " and cost codes" : ""} on the form, then confirm.
                 </div>
                 <div className="review-banner-actions">
                   <button type="button" className="btn btn-ghost" onClick={handleDiscard}>

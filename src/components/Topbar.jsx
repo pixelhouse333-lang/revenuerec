@@ -10,20 +10,30 @@ export default function Topbar() {
   }, [dispatch]);
 
   function handleSave() {
-    if (state.pendingFieldIds.length > 0) {
-      const firstField = document.getElementById(state.pendingFieldIds[0]);
-      if (firstField) firstField.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (state.pendingFieldIds.length > 0 || state.pendingCostCodeIds.length > 0) {
+      const firstId = state.pendingFieldIds[0] || state.pendingCostCodeIds[0];
+      const firstEl = document.getElementById(firstId);
+      if (firstEl) firstEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      const parts = [];
+      if (state.pendingFieldIds.length > 0) parts.push(state.pendingFieldIds.length + " field(s)");
+      if (state.pendingCostCodeIds.length > 0) parts.push(state.pendingCostCodeIds.length + " cost code(s)");
       alert(
-        state.pendingFieldIds.length +
-          " field(s) imported from the contract document still need review. " +
-          "Confirm or edit the highlighted fields before saving."
+        parts.join(" and ") +
+          " imported from the contract document still need review. " +
+          "Confirm or edit the highlighted items before saving."
       );
       return;
     }
 
     const list = loadAllContracts();
     const id = state.contract.contractNumber || state.contract.projectName || String(Date.now());
-    const record = { id, ...state.contract, wipEntries: state.wipEntries, savedAt: new Date().toISOString() };
+    const record = {
+      id,
+      ...state.contract,
+      wipEntries: state.wipEntries,
+      costCodes: state.costCodes,
+      savedAt: new Date().toISOString(),
+    };
     const existingIndex = list.findIndex((c) => c.id === id);
     if (existingIndex >= 0) list[existingIndex] = record;
     else list.push(record);
