@@ -31,6 +31,11 @@ export default function CostCodesSection() {
   const sorted = [...state.costCodes].sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
   const totalBudget = state.costCodes.reduce((sum, c) => sum + c.budgetAmount, 0);
 
+  function updateBudget(id, value) {
+    const amount = parseFloat(value);
+    dispatch({ type: "UPDATE_COST_CODE", id, field: "budgetAmount", value: Number.isFinite(amount) ? amount : 0 });
+  }
+
   return (
     <section className="card">
       <div className="card-header-row">
@@ -42,8 +47,21 @@ export default function CostCodesSection() {
       <p className="field-note import-note">
         The budget breakdown for this contract, by cost code. Import it from the contract's schedule of values
         (via "Import from document" above) or add codes manually — the WIP Schedule tags every cost entry against
-        one of these codes so actual costs roll up to the right budget line automatically.
+        one of these codes so actual costs roll up to the right budget line automatically. Budgeted amounts stay
+        editable below since management's estimate for a code can change as the project progresses.
       </p>
+
+      {state.costCodes.length > 0 && (
+        <div className="pulled-stat cost-codes-estimate-stat">
+          <span className="pulled-stat-label">Total estimated cost at completion</span>
+          <span className="pulled-stat-value">{fmtCurrency(state.contract.totalEstimatedCost)}</span>
+          <span className="pulled-stat-source">
+            {state.contract.costEstimateUpdatedAt
+              ? `Manually revised ${state.contract.costEstimateUpdatedAt} — no longer synced to cost codes`
+              : "Synced to the cost codes total below — edit it directly on Cost & Revenue Recognition to freeze it"}
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-2">
         <label className="field">
@@ -122,7 +140,17 @@ export default function CostCodesSection() {
                       </span>
                     )}
                   </td>
-                  <td className="wip-col-amount mono-field">{fmtCurrency(c.budgetAmount)}</td>
+                  <td className="wip-col-amount">
+                    <input
+                      type="number"
+                      className="mono-field cost-code-amount-input"
+                      min="0"
+                      step="0.01"
+                      value={c.budgetAmount}
+                      onChange={(e) => updateBudget(c.id, e.target.value)}
+                      aria-label={`Budgeted amount for ${c.code}`}
+                    />
+                  </td>
                   <td>
                     <button
                       type="button"

@@ -135,6 +135,13 @@ function reducer(state, action) {
       });
     case "SET_COST_CODES":
       return withSeededEstimate({ ...state, costCodes: action.costCodes });
+    case "UPDATE_COST_CODE":
+      return withSeededEstimate({
+        ...state,
+        costCodes: state.costCodes.map((c) =>
+          c.id === action.id ? { ...c, [action.field]: action.value } : c
+        ),
+      });
     case "IMPORT_COST_CODES": {
       const costCodes = [...state.costCodes, ...action.costCodes];
       const pendingCostCodeIds = [

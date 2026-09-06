@@ -8,6 +8,7 @@ import {
   LayersIcon,
   BarChartIcon,
   SettingsIcon,
+  BookIcon,
   SunIcon,
   MoonIcon,
 } from "./icons.jsx";
@@ -51,6 +52,16 @@ export default function Sidebar() {
         >
           <DocumentIcon className="nav-icon" />
           <span>Contracts</span>
+        </button>
+
+        <button
+          type="button"
+          className={"nav-item" + (state.activeView === "journal" ? " active" : "")}
+          aria-current={state.activeView === "journal" ? "page" : undefined}
+          onClick={() => goTo("journal")}
+        >
+          <BookIcon className="nav-icon" />
+          <span>Journal Entries</span>
         </button>
 
         <button type="button" className="nav-item" disabled>
