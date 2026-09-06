@@ -57,9 +57,7 @@ html, body {
 }
 
 .app {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 32px 32px 88px;
+  padding: 32px 40px 88px;
 }
 
 /* Shell: sidebar + main */
